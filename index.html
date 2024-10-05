@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Catcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        #request-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+            list-style: none;
+            padding: 0;
+        }
+
+        .request-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .request-card .header {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .request-card .detail {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .request-card pre {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+<h1>Incoming Requests</h1>
+<ul id="request-list"></ul>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // Connect to the WebSocket server
+  const socket = io();
+
+  // Function to format the date and time
+  function formatDateTime() {
+    const now = new Date();
+    return now.toLocaleString(); // Formats date and time based on user's locale
+  }
+
+  // Listen for new requests
+  socket.on('newRequest', (data) => {
+    const list = document.getElementById('request-list');
+
+    // Create a new list item for each request
+    const listItem = document.createElement('li');
+    listItem.className = 'request-card';
+
+    // Get the current date and time
+    const timestamp = formatDateTime();
+
+    // Format request data elegantly
+    listItem.innerHTML = `
+        <div class="header">${data.method} ${data.path}</div>
+        <div class="timestamp">${timestamp}</div>
+        <div class="detail">Headers:</div>
+        <pre>${JSON.stringify(data.headers, null, 2)}</pre>
+        <div class="detail">Body:</div>
+        <pre>${JSON.stringify(data.body, null, 2)}</pre>
+        <div class="detail">Query Parameters:</div>
+        <pre>${JSON.stringify(data.query, null, 2)}</pre>
+      `;
+
+    // Insert the new list item at the top of the list
+    list.insertBefore(listItem, list.firstChild);
+  });
+</script>
+</body>
+</html>
