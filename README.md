@@ -2,6 +2,11 @@
 
 
 
+### How to run
+* after clone run
+* `npm install`
+* `node app.js`
+
 ### Calls example
 
 #### GET request with query params
