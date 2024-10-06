@@ -5,133 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Request Catcher</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-
-        #request-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-            list-style: none;
-            padding: 0;
-        }
-
-        .request-card {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .request-card .header {
-            font-weight: bold;
-            color: #007bff;
-        }
-
-        .request-card .detail {
-            font-size: 14px;
-            color: #555;
-        }
-
-        .request-card pre {
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            max-height: 300px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-
-        .timestamp {
-            font-size: 12px;
-            color: #888;
-        }
-
-        #clear-btn {
-            display: block;
-            margin: 20px auto;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #003366, #1e90ff); /* Dark blue to blue gradient */
-            border: none;
-            border-radius: 30px;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
-            transition: all 0.3s ease; /* Smooth transition on hover */
-        }
-
-        #clear-btn:hover {
-            background: linear-gradient(135deg, #002244, #0b5394); /* Darker gradient on hover */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Larger shadow on hover */
-            transform: translateY(-3px); /* Slight lift on hover */
-        }
+        body { font-family: Arial, sans-serif; }
+        #requestList { margin-top: 20px; }
+        .request-item { border: 1px solid #ddd; padding: 10px; margin: 5px 0; }
+        .request-header { font-weight: bold; }
+        .clear-button { background-color: darkblue; color: white; padding: 10px; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
-<h1>Incoming Requests</h1>
-<button id="clear-btn">Clear All Requests</button>
-
-
-<ul id="request-list"></ul>
+<h1>Request Catcher - Namespace: <span id="namespace"></span></h1>
+<button class="clear-button" id="clearRequests">Clear All Requests</button>
+<div id="requestList"></div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  // Connect to the WebSocket server
-  const socket = io();
+  // Get the namespace from the URL
+  const namespace = window.location.pathname.split('/')[1];
+  document.getElementById('namespace').innerText = namespace;
 
-  // Function to format the date and time
-  function formatDateTime() {
-    const now = new Date();
-    return now.toLocaleString(); // Formats date and time based on user's locale
-  }
+  // Connect to the specific namespace with a query
+  const socket = io(`http://localhost:3001/${namespace}`, { query: { namespace } });
+
+  // Log connection status
+  socket.on('connect', () => {
+    console.log(`Connected to namespace: ${namespace}`);
+  });
 
   // Listen for new requests
-  socket.on('newRequest', (data) => {
-    const list = document.getElementById('request-list');
-
-    // Create a new list item for each request
-    const listItem = document.createElement('li');
-    listItem.className = 'request-card';
-
-    // Get the current date and time
-    const timestamp = formatDateTime();
-
-    // Format request data elegantly
-    listItem.innerHTML = `
-        <div class="header">${data.method} ${data.path}</div>
-        <div class="timestamp">${timestamp}</div>
-        <div class="detail">Headers:</div>
-        <pre>${JSON.stringify(data.headers, null, 2)}</pre>
-        <div class="detail">Body:</div>
-        <pre>${JSON.stringify(data.body, null, 2)}</pre>
-        <div class="detail">Query Parameters:</div>
-        <pre>${JSON.stringify(data.query, null, 2)}</pre>
-      `;
-
-    // Insert the new list item at the top of the list
-    list.insertBefore(listItem, list.firstChild);
+  socket.on('newRequest', (requestData) => {
+    console.log('New request received:', requestData); // Log the received request data
+    const requestList = document.getElementById('requestList');
+    const requestItem = document.createElement('div');
+    requestItem.className = 'request-item';
+    requestItem.innerHTML = `
+                <div class="request-header">${requestData.method} ${requestData.path}</div>
+                <div>Timestamp: ${requestData.timestamp}</div>
+                <div>Headers: ${JSON.stringify(requestData.headers, null, 2)}</div>
+                <div>Query: ${JSON.stringify(requestData.query, null, 2)}</div>
+                <div>Params: ${JSON.stringify(requestData.params, null, 2)}</div>
+                <div>Body: ${JSON.stringify(requestData.body, null, 2)}</div>
+            `;
+    requestList.insertBefore(requestItem, requestList.firstChild); // Insert at the top
   });
-  const clearBtn = document.getElementById('clear-btn');
-  clearBtn.addEventListener('click', () => {
-    const list = document.getElementById('request-list');
-    list.innerHTML = ''; // Clear all items in the request list
+
+  // Handle clearing of requests
+  document.getElementById('clearRequests').onclick = () => {
+    socket.emit('clearRequests');
+  };
+
+  // Listen for clearAllRequests event to update UI
+  socket.on('clearAllRequests', () => {
+    document.getElementById('requestList').innerHTML = ''; // Clear request list
   });
 </script>
 </body>

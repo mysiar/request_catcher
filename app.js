@@ -5,68 +5,88 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server); // Attach socket.io to the server
-const port = 3001;
+const io = socketIO(server);
+const port = 3001; // Set to port 3001
 
-function handleRequest (req, res) {
-  const { method, headers, query, params, body, path } = req;
+// Middleware to parse JSON bodies
+app.use(express.json());
 
-  const userAgent = headers['user-agent'];
+// Object to store incoming requests for each namespace
+let namespaceRequests = {};
 
-  if (userAgent && (userAgent.includes('Mozilla') || userAgent.includes('Chrome') || userAgent.includes('Safari'))) {
-    return res.status(204).send();
-  }
+// Serve the root landing page with instructions
+app.get('/', (req, res) => {
+  res.send(`
+    <h1>Welcome to Request Catcher</h1>
+    <p>This application allows multiple users to catch HTTP requests in their own namespaces.</p>
+    <p>To get started, please go to <code>/default</code> or create your own unique namespace by going to <code>/your-namespace</code>.</p>
+    <p>Example: <a href="/default">/default</a></p>
+  `);
+});
 
-  const staticFileExtensions = ['.html', '.js', '.css', '.png', '.jpg', '.svg'];
-  if (staticFileExtensions.some(ext => path.endsWith(ext))) {
-    return res.status(204).send(); // Ignore static asset requests
-  }
+// Serve the static HTML file for each namespace
+app.get('/:namespace', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
+// Handle all types of requests for specific namespaces
+app.all('/:namespace/*', (req, res) => {
+  const { namespace } = req.params;
+  const { method, headers, query, params, body } = req;
+
+  // Create an object to store all request details
   const requestData = {
     method,
-    path,
+    path: req.path,
     headers,
     query,
     params,
     body,
+    timestamp: new Date().toLocaleString(),
   };
 
-  requests.push(requestData);
+  // Initialize the request array for the namespace if not existing
+  if (!namespaceRequests[namespace]) {
+    namespaceRequests[namespace] = [];
+  }
 
-  io.emit('newRequest', requestData);
+  // Store the request in memory for the specific namespace
+  namespaceRequests[namespace].unshift(requestData); // Add new request at the top
 
+  // Emit the new request to the specific namespace
+  io.of(`/${namespace}`).emit('newRequest', requestData);
+
+  // Respond to the HTTP request
   res.json({
-    message: `${method} request received and displayed`,
+    message: `${method} request received for namespace: ${namespace}`,
     receivedData: requestData,
   });
 
-  console.debug('Received external request:', requestData);
-}
-
-
-app.use(express.json());
-
-let requests = [];
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  console.log(`Received request for namespace: ${namespace}`, requestData);
 });
 
-
-app.all('*', handleRequest);
-
+// Socket.io connection for each namespace
 io.on('connection', (socket) => {
-  console.debug('A client connected');
+  const namespace = socket.handshake.query.namespace;
 
-  requests.forEach((request) => {
-    socket.emit('newRequest', request);
-  });
+  if (!namespace) {
+    console.error("Namespace not provided in query!");
+    return;
+  }
 
-  socket.on('disconnect', () => {
-    console.debug('A client disconnected');
+  // Join the user's namespace
+  socket.join(namespace);
+  console.log(`${namespace} connected to their namespace`);
+
+  // Handle clearing of requests for this namespace
+  socket.on('clearRequests', () => {
+    namespaceRequests[namespace] = [];
+    io.of(`/${namespace}`).emit('clearAllRequests');
+    console.log(`Cleared requests for namespace: ${namespace}`);
   });
 });
 
+// Start the server
 server.listen(port, () => {
-  console.debug(`Server running on port ${port}`);
+  console.log(`Server running on http://localhost:${port}`);
 });
