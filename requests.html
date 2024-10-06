@@ -99,10 +99,11 @@
   const namespace = window.location.pathname.split('/')[1];
   document.getElementById('namespace').innerText = namespace;
 
-  // Connect to the specific namespace with a query
   const socket = io(`http://localhost:3001/${namespace}`, { query: { namespace } });
 
-  // Log connection status
+  // this call is just to wake up socket
+  fetch(`/${namespace}/self_test`);
+
   socket.on('connect', () => {
     console.log(`Connected to namespace: ${namespace}`);
 
@@ -117,11 +118,9 @@
       })
     })
       .then(response => response.json())
-      .then(data => console.log('Self test request response:', data))
       .catch(error => console.error('Error during request:', error));
   });
 
-  // Listen for new requests
   socket.on('newRequest', (requestData) => {
     console.log('New request received:', requestData); // Log the received request data
     const requestList = document.getElementById('requestList');

@@ -1,3 +1,11 @@
+install::
+	rm -rf node_modules
+	npm install
+
+run::
+	node app.js
+
+
 requests::
 	curl http://localhost:3001/default/data?name=John&age=30
 	curl -X PUT http://localhost:3001/default/data/123 -H "Content-Type: application/json" -d '{"status":"updated"}'

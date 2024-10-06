@@ -6,8 +6,10 @@ const path = require('path');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
+
 const port = 3001; // Set to port 3001
 
+const namespaces = [];
 
 app.use(express.json());
 
@@ -18,6 +20,12 @@ app.get('/', (req, res) => {
 });
 
 app.get('/:namespace', (req, res) => {
+  const { namespace } = req.params;
+  if (!namespaces.includes(namespace)) {
+    namespaces.push(namespace);
+  }
+  console.log(namespaces)
+
   res.sendFile(path.join(__dirname, 'requests.html'));
 });
 
@@ -26,14 +34,8 @@ app.all('/:namespace/*', (req, res) => {
   const { method, headers, query, params, body } = req;
 
   const requestData = {
-    method,
-    // path: req.path,
-    path: req.path.replace(`/${req.params.namespace}`, ''),
-    headers,
-    query,
-    params,
-    body,
-    timestamp: new Date().toLocaleString(),
+    method, // path: req.path,
+    path: req.path.replace(`/${req.params.namespace}`, ''), headers, query, params, body, timestamp: new Date().toLocaleString(),
   };
 
   if (!namespaceRequests[namespace]) {
@@ -45,8 +47,7 @@ app.all('/:namespace/*', (req, res) => {
   io.of(`/${namespace}`).emit('newRequest', requestData);
 
   res.json({
-    message: `${method} request received for namespace: ${namespace}`,
-    receivedData: requestData,
+    message: `${method} request received for namespace: ${namespace}`, receivedData: requestData,
   });
 
   console.log(`Received request for namespace: ${namespace}`, requestData);
@@ -62,12 +63,6 @@ io.on('connection', (socket) => {
 
   socket.join(namespace);
   console.log(`${namespace} connected to their namespace`);
-
-  // socket.on('clearRequests', () => {
-  //   namespaceRequests[namespace] = [];
-  //   io.of(`/${namespace}`).emit('clearAllRequests');
-  //   console.log(`Cleared requests for namespace: ${namespace}`);
-  // });
 });
 
 server.listen(port, () => {
