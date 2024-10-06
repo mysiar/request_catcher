@@ -61,10 +61,34 @@
             font-size: 12px;
             color: #888;
         }
+
+        #clear-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #003366, #1e90ff); /* Dark blue to blue gradient */
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
+            transition: all 0.3s ease; /* Smooth transition on hover */
+        }
+
+        #clear-btn:hover {
+            background: linear-gradient(135deg, #002244, #0b5394); /* Darker gradient on hover */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Larger shadow on hover */
+            transform: translateY(-3px); /* Slight lift on hover */
+        }
     </style>
 </head>
 <body>
 <h1>Incoming Requests</h1>
+<button id="clear-btn">Clear All Requests</button>
+
+
 <ul id="request-list"></ul>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -103,6 +127,11 @@
 
     // Insert the new list item at the top of the list
     list.insertBefore(listItem, list.firstChild);
+  });
+  const clearBtn = document.getElementById('clear-btn');
+  clearBtn.addEventListener('click', () => {
+    const list = document.getElementById('request-list');
+    list.innerHTML = ''; // Clear all items in the request list
   });
 </script>
 </body>
