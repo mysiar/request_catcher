@@ -1,109 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Catcher</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
+<h1>Welcome to Request Catcher</h1>
+<h3 style="color: red !important;">Disclaimer</h3>
+<p style="color: red !important;">This application is only to be used for development.<br>
+    It doesn't provide any security so do not send any sensitive data.</p>
+<hr>
+<p>This application allows multiple users to catch HTTP requests in their own namespaces.</p>
+<p>To get started, please go to <code>/default</code> or create your own unique namespace by going to <code>/your-namespace</code>.
+</p>
+<p>Example: <a href="/default">/default</a></p>
+<p>To catch requests open in web rowser your own namespace and start calling, examples below</p>
+<hr>
+Please try to use unique namespace as if you create new namespace that already exists calls will be displayed on both.
+<br>
+Example of kind of unique namespaces:
+<ul>
+    <li>UUID: 04ffcfee-f35d-449c-ab94-7f148955f3a6</li>
+    <li>your application name</li>
+    <li>repository name combined with branch name</li>
+</ul>
+<br>
 
-        h1 {
-            color: #333;
-            text-align: center;
-        }
 
-        #request-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-            list-style: none;
-            padding: 0;
-        }
+<hr>
+<h3>Call examples</h3>
+<h4>default namespace</h4>
+curl http://CATCHER_URL/default/data?name=John&age=30
+<br>
+curl -X POST http://CATCHER_URL/default/data -H "Content-Type: application/json" -d '{"name":"John", "age":30}'
+<h4>custom namespace</h4>
+curl http://CATCHER_URL/your-namespace/data?name=John&age=30
+<br>
+curl -X POST http://CATCHER_URL/your-namespace/data -H "Content-Type: application/json" -d '{"name":"John", "age":30}'
 
-        .request-card {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .request-card .header {
-            font-weight: bold;
-            color: #007bff;
-        }
-
-        .request-card .detail {
-            font-size: 14px;
-            color: #555;
-        }
-
-        .request-card pre {
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            max-height: 300px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-
-        .timestamp {
-            font-size: 12px;
-            color: #888;
-        }
-    </style>
-</head>
-<body>
-<h1>Incoming Requests</h1>
-<ul id="request-list"></ul>
-
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  // Connect to the WebSocket server
-  const socket = io();
-
-  // Function to format the date and time
-  function formatDateTime() {
-    const now = new Date();
-    return now.toLocaleString(); // Formats date and time based on user's locale
-  }
-
-  // Listen for new requests
-  socket.on('newRequest', (data) => {
-    const list = document.getElementById('request-list');
-
-    // Create a new list item for each request
-    const listItem = document.createElement('li');
-    listItem.className = 'request-card';
-
-    // Get the current date and time
-    const timestamp = formatDateTime();
-
-    // Format request data elegantly
-    listItem.innerHTML = `
-        <div class="header">${data.method} ${data.path}</div>
-        <div class="timestamp">${timestamp}</div>
-        <div class="detail">Headers:</div>
-        <pre>${JSON.stringify(data.headers, null, 2)}</pre>
-        <div class="detail">Body:</div>
-        <pre>${JSON.stringify(data.body, null, 2)}</pre>
-        <div class="detail">Query Parameters:</div>
-        <pre>${JSON.stringify(data.query, null, 2)}</pre>
-      `;
-
-    // Insert the new list item at the top of the list
-    list.insertBefore(listItem, list.firstChild);
-  });
-</script>
-</body>
-</html>
