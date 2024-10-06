@@ -37,7 +37,8 @@ app.all('/:namespace/*', (req, res) => {
   // Create an object to store all request details
   const requestData = {
     method,
-    path: req.path,
+    // path: req.path,
+    path: req.path.replace(`/${req.params.namespace}`, ''),
     headers,
     query,
     params,
