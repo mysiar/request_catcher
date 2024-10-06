@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Catcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .request-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .request-card .header {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .request-card .detail {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .request-card pre {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+        }
+        #requestList {
+            margin-top: 20px;
+        }
+
+        .request-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
+        }
+
+        .request-header {
+            font-weight: bold;
+        }
+
+        .clear-button {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #003366, #1e90ff);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .clear-button:hover {
+            background: linear-gradient(135deg, #002244, #0b5394);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+<h1>Request Catcher - Namespace: <span id="namespace"></span></h1>
+<button class="clear-button" id="clearRequests">Clear All Requests</button>
+
+<ul id="requestList"></ul>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // Get the namespace from the URL
+  const namespace = window.location.pathname.split('/')[1];
+  document.getElementById('namespace').innerText = namespace;
+
+  // Connect to the specific namespace with a query
+  const socket = io(`http://localhost:3001/${namespace}`, { query: { namespace } });
+
+  // Log connection status
+  socket.on('connect', () => {
+    console.log(`Connected to namespace: ${namespace}`);
+  });
+
+  // Listen for new requests
+  socket.on('newRequest', (requestData) => {
+    console.log('New request received:', requestData); // Log the received request data
+    const requestList = document.getElementById('requestList');
+    const requestItem = document.createElement('li');
+    requestItem.className = 'request-card';
+    requestItem.innerHTML = `
+        <div class="header">${requestData.method} ${requestData.path}</div>
+        <div class="timestamp">${requestData.timestamp}</div>
+        <div class="detail">Headers:</div>
+        <pre>${JSON.stringify(requestData.headers, null, 2)}</pre>
+        <div class="detail">Payload:</div>
+        <pre>${JSON.stringify(requestData.body, null, 2)}</pre>
+        <div class="detail">Query Parameters:</div>
+        <pre>${JSON.stringify(requestData.query, null, 2)}</pre>
+      `;
+    requestList.insertBefore(requestItem, requestList.firstChild);
+  });
+
+  const clearBtn = document.getElementById('clearRequests');
+  clearBtn.addEventListener('click', () => {
+    const list = document.getElementById('requestList');
+    list.innerHTML = ''; // Clear all items in the request list
+  });
+</script>
+</body>
+</html>

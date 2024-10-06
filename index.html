@@ -1,62 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Catcher</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        #requestList { margin-top: 20px; }
-        .request-item { border: 1px solid #ddd; padding: 10px; margin: 5px 0; }
-        .request-header { font-weight: bold; }
-        .clear-button { background-color: darkblue; color: white; padding: 10px; border: none; cursor: pointer; }
-    </style>
-</head>
-<body>
-<h1>Request Catcher - Namespace: <span id="namespace"></span></h1>
-<button class="clear-button" id="clearRequests">Clear All Requests</button>
-<div id="requestList"></div>
+<h1>Welcome to Request Catcher</h1>
+<p>This application allows multiple users to catch HTTP requests in their own namespaces.</p>
+<p>To get started, please go to <code>/default</code> or create your own unique namespace by going to <code>/your-namespace</code>.</p>
+<p>Example: <a href="/default">/default</a></p>
+<hr>
+<h3>Example calls</h3>
+<h4>default namespace</h4>
+curl http://CATCHER_URL/default/data?name=John&age=30
+<br>
+curl -X POST http://CATCHER_URL/default/data -H "Content-Type: application/json" -d '{"name":"John", "age":30}'
+<h4>custom namespace</h4>
+curl http://CATCHER_URL/your-namespace/data?name=John&age=30
+<br>
+curl -X POST http://CATCHER_URL/your-namespace/data -H "Content-Type: application/json" -d '{"name":"John", "age":30}'
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  // Get the namespace from the URL
-  const namespace = window.location.pathname.split('/')[1];
-  document.getElementById('namespace').innerText = namespace;
-
-  // Connect to the specific namespace with a query
-  const socket = io(`http://localhost:3001/${namespace}`, { query: { namespace } });
-
-  // Log connection status
-  socket.on('connect', () => {
-    console.log(`Connected to namespace: ${namespace}`);
-  });
-
-  // Listen for new requests
-  socket.on('newRequest', (requestData) => {
-    console.log('New request received:', requestData); // Log the received request data
-    const requestList = document.getElementById('requestList');
-    const requestItem = document.createElement('div');
-    requestItem.className = 'request-item';
-    requestItem.innerHTML = `
-                <div class="request-header">${requestData.method} ${requestData.path}</div>
-                <div>Timestamp: ${requestData.timestamp}</div>
-                <div>Headers: ${JSON.stringify(requestData.headers, null, 2)}</div>
-                <div>Query: ${JSON.stringify(requestData.query, null, 2)}</div>
-                <div>Params: ${JSON.stringify(requestData.params, null, 2)}</div>
-                <div>Body: ${JSON.stringify(requestData.body, null, 2)}</div>
-            `;
-    requestList.insertBefore(requestItem, requestList.firstChild); // Insert at the top
-  });
-
-  // Handle clearing of requests
-  document.getElementById('clearRequests').onclick = () => {
-    socket.emit('clearRequests');
-  };
-
-  // Listen for clearAllRequests event to update UI
-  socket.on('clearAllRequests', () => {
-    document.getElementById('requestList').innerHTML = ''; // Clear request list
-  });
-</script>
-</body>
-</html>
