@@ -23,3 +23,6 @@ curl -X PUT http://localhost:3001/default/data/123 -H "Content-Type: application
 #### DELETE request
 
 curl -X DELETE http://localhost:3001/default/data/123
+
+
+![image](doc/image1.png)
