@@ -88,7 +88,7 @@
 </head>
 <body>
 <h1>Request Catcher - Namespace: <span id="namespace"></span></h1>
-<button class="clear-button" id="clearRequests">Clear All Requests</button>
+<button class="clear-button" id="clearRequests">Clear Requests</button>
 
 <ul id="requestList"></ul>
 
@@ -113,7 +113,7 @@
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        message: "This is a test POST request",
+        message: "This is a self test POST request",
         timestamp: new Date().toISOString()
       })
     })
@@ -141,8 +141,7 @@
 
   const clearBtn = document.getElementById('clearRequests');
   clearBtn.addEventListener('click', () => {
-    const list = document.getElementById('requestList');
-    list.innerHTML = ''; // Clear all items in the request list
+    window.location.reload()
   });
 
 </script>
