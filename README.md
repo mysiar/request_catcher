@@ -1,5 +1,8 @@
 # Simple request catcher
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Mozilla
 ### How to run
 
 * after clone run
