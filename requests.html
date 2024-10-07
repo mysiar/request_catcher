@@ -50,18 +50,8 @@
             color: #888;
         }
 
-        #requestList {
+        #request-list {
             margin-top: 20px;
-        }
-
-        .request-item {
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin: 5px 0;
-        }
-
-        .request-header {
-            font-weight: bold;
         }
 
         .clear-button {
@@ -90,7 +80,7 @@
 <h1>Request Catcher - Namespace: <span id="namespace"></span></h1>
 <button class="clear-button" id="clearRequests">Clear Requests</button>
 
-<ul id="requestList"></ul>
+<ul id="request-list"></ul>
 
 
 <script src="/socket.io/socket.io.js"></script>
@@ -132,7 +122,7 @@
 
   socket.on('newRequest', (requestData) => {
     console.log('New request received:', requestData); // Log the received request data
-    const requestList = document.getElementById('requestList');
+    const requestList = document.getElementById('request-list');
     const requestItem = document.createElement('li');
     requestItem.className = 'request-card';
     requestItem.innerHTML = `
