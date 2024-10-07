@@ -99,7 +99,7 @@
   const namespace = window.location.pathname.split('/')[1];
   document.getElementById('namespace').innerText = namespace;
 
-  const socket = io(`http://localhost:3001/${namespace}`, { query: { namespace } });
+  const socket = io(`http://localhost:3100/${namespace}`, { query: { namespace } });
 
   // this call is just to wake up socket
   fetch(`/${namespace}/self_test`);

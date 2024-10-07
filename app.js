@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 
-const port = 3001; // Set to port 3001
+const port = 3100; // Set to port 3001
 
 const namespaces = [];
 
@@ -24,7 +24,6 @@ app.get('/:namespace', (req, res) => {
   if (!namespaces.includes(namespace)) {
     namespaces.push(namespace);
   }
-  console.log(namespaces)
 
   res.sendFile(path.join(__dirname, 'requests.html'));
 });
