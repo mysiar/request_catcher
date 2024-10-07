@@ -10,7 +10,7 @@ Mozilla
 * `node app.js`
 
 or
-* docker run run -d -p 3100:3100 $(docker build -q .)
+* `docker run run -d -p 3100:3100 $(docker build -q .)`
 
 ### Call examples
 
