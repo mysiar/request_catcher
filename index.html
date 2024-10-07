@@ -1,10 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Catcher</title>
+
+</head>
+<body>
 <h1>Welcome to Request Catcher</h1>
 <h3 style="color: red !important;">Disclaimer</h3>
 <p style="color: red !important;">This application is only to be used for development.<br>
     It doesn't provide any security so do not send any sensitive data.</p>
 <hr>
 <p>This application allows multiple users to catch HTTP requests in their own namespaces.</p>
-<p>To get started, please go to <code>/default</code> or create your own unique namespace by going to <code>/your-namespace</code>.
+<p>To get started, please go to <code>/default</code> or create your own unique namespace by going to <code><strong>/your-namespace</strong></strong></code>.
 </p>
 <p>Example: <a href="/default">/default</a></p>
 <p>To catch requests open in web rowser your own namespace and start calling, examples below</p>
@@ -23,11 +32,37 @@ Example of kind of unique namespaces:
 <hr>
 <h3>Call examples</h3>
 <h4>default namespace</h4>
-curl http://CATCHER_URL/default/data?name=John&age=30
-<br>
-curl -X POST http://CATCHER_URL/default/data -H "Content-Type: application/json" -d '{"name":"John", "age":30}'
-<h4>custom namespace</h4>
-curl http://CATCHER_URL/your-namespace/data?name=John&age=30
-<br>
-curl -X POST http://CATCHER_URL/your-namespace/data -H "Content-Type: application/json" -d '{"name":"John", "age":30}'
+<ul>
+<li><strong>GET</strong> curl <span class="location"></span>/default/data?name=John&age=30</li>
+<li><strong>POST</strong> curl -X POST <span class="location"></span>/default/data -H "Content-Type: application/json" -d '{"name":"John",
+"age":30}'</li>
+<li><strong>PUT</strong> curl -X PUT <span class="location"></span>/default/data/123 -H "Content-Type: application/json" -d '{"status":"updated"}'</li>
+<li><strong>DELETE</strong> curl -X DELETE <span class="location"></span>/default/data/123</li>
+</ul>
 
+<h4>custom namespace</h4>
+<ul>
+<li><strong>GET</strong> curl <span class="location"></span>/<strong>your-namespace</strong>/data?name=John&age=30</li>
+<li><strong>POST</strong> curl -X POST <span class="location"></span>/<strong>your-namespace</strong>/data -H "Content-Type: application/json" -d '{"name":"John",
+    "age":30}'</li>
+    <li><strong>PUT</strong> curl -X PUT <span class="location"></span>/<strong>your-namespace</strong>/data/123 -H "Content-Type: application/json" -d '{"status":"updated"}'</li>
+    <li><strong>DELETE</strong> curl -X DELETE <span class="location"></span>/<strong>your-namespace</strong>/data/123</li>
+
+</ul>
+
+
+</body>
+
+<script>
+  const port = window.location.port
+
+  const elements = document.getElementsByClassName("location");
+  const elements_array = Array.from(elements)
+  elements_array.forEach((element) => {
+    element.innerHTML = window.location.protocol + "//" + window.location.hostname;
+    if (port) {
+      element.innerHTML += ":" + port
+    }
+  });
+
+</script>
