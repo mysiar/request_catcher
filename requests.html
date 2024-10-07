@@ -95,11 +95,20 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
+  function host() {
+    const port = window.location.port
+    let host = window.location.protocol + "//" + window.location.hostname;
+    if (port) {
+      host += ":" + port
+    }
+
+    return host
+  }
   // Get the namespace from the URL
   const namespace = window.location.pathname.split('/')[1];
   document.getElementById('namespace').innerText = namespace;
 
-  const socket = io(`http://localhost:3100/${namespace}`, { query: { namespace } });
+  const socket = io(`${host()}/${namespace}`, { query: { namespace } });
 
   // this call is just to wake up socket
   fetch(`/${namespace}/self_test`);
